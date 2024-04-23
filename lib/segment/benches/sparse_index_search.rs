@@ -69,9 +69,12 @@ fn sparse_vector_index_search_benchmark(c: &mut Criterion) {
     let permit = Arc::new(CpuPermit::dummy(permit_cpu_count as u32));
 
     // mmap inverted index
+    #[cfg(any())]
     let mmap_index_dir = Builder::new().prefix("mmap_index_dir").tempdir().unwrap();
+    #[cfg(any())]
     let sparse_index_config =
         SparseIndexConfig::new(Some(FULL_SCAN_THRESHOLD), SparseIndexType::Mmap);
+    #[cfg(any())]
     let mut sparse_vector_index_mmap: SparseVectorIndex<InvertedIndexMmap> =
         SparseVectorIndex::open(
             sparse_index_config,
@@ -82,12 +85,16 @@ fn sparse_vector_index_search_benchmark(c: &mut Criterion) {
             &stopped,
         )
         .unwrap();
+    #[cfg(any())]
     sparse_vector_index_mmap
         .build_index(permit, &stopped)
         .unwrap();
+    #[cfg(any())]
     assert_eq!(sparse_vector_index_mmap.indexed_vector_count(), NUM_VECTORS);
 
     // intent: bench `search` without filter on mmap inverted index
+    // disabled
+    #[cfg(any())]
     group.bench_function("mmap-inverted-index-search", |b| {
         b.iter(|| {
             let results = sparse_vector_index_mmap
@@ -184,7 +191,8 @@ fn sparse_vector_index_search_benchmark(c: &mut Criterion) {
 #[cfg(not(target_os = "windows"))]
 criterion_group! {
     name = benches;
-    config = Criterion::default().with_profiler(prof::FlamegraphProfiler::new(100));
+    // config = Criterion::default().with_profiler(prof::FlamegraphProfiler::new(100));
+    config = Criterion::default();
     targets = sparse_vector_index_search_benchmark
 }
 
