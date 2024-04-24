@@ -12,7 +12,9 @@ use crate::common::operation_error::{check_process_stopped, OperationError, Oper
 use crate::common::rocksdb_wrapper::DatabaseColumnWrapper;
 use crate::common::Flusher;
 use crate::data_types::named_vectors::CowVector;
-use crate::data_types::vectors::{MultiDenseVector, VectorRef};
+use crate::data_types::vectors::{
+    MultiDenseVector, TypedMultiDenseVectorRef, VectorElementType, VectorRef,
+};
 use crate::types::{Distance, MultiVectorConfig, VectorStorageDatatype};
 use crate::vector_storage::bitvec::bitvec_set_deleted;
 use crate::vector_storage::common::StoredRecord;
@@ -126,9 +128,9 @@ impl SimpleMultiDenseVectorStorage {
     }
 }
 
-impl MultiVectorStorage for SimpleMultiDenseVectorStorage {
-    fn get_multi(&self, key: PointOffsetType) -> &MultiDenseVector {
-        self.vectors.get(key as usize).expect("vector not found")
+impl MultiVectorStorage<VectorElementType> for SimpleMultiDenseVectorStorage {
+    fn get_multi(&self, key: PointOffsetType) -> TypedMultiDenseVectorRef<VectorElementType> {
+        TypedMultiDenseVectorRef::from(self.vectors.get(key as usize).expect("vector not found"))
     }
 
     fn multi_vector_config(&self) -> &MultiVectorConfig {
