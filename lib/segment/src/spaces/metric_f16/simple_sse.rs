@@ -82,6 +82,7 @@ pub(crate) unsafe fn euclid_similarity_sse(
 }
 
 #[target_feature(enable = "sse")]
+#[target_feature(enable = "f16c")]
 pub(crate) unsafe fn manhattan_similarity_sse(
     v1: &[VectorElementTypeHalf],
     v2: &[VectorElementTypeHalf],
@@ -187,6 +188,7 @@ pub(crate) unsafe fn manhattan_similarity_sse(
 // }
 
 #[target_feature(enable = "sse")]
+#[target_feature(enable = "f16c")]
 pub(crate) unsafe fn dot_similarity_sse(
     v1: &[VectorElementTypeHalf],
     v2: &[VectorElementTypeHalf],
@@ -268,17 +270,17 @@ mod tests {
                 f16::from_f32(56.), f16::from_f32(57.), f16::from_f32(58.), f16::from_f32(59.), f16::from_f32(60.), f16::from_f32(61.),
             ];
 
-            // let euclid_simd = unsafe { euclid_similarity_sse(&v1, &v2) };
-            // let euclid = euclid_similarity_half(&v1, &v2);
-            // assert_eq!(euclid_simd, euclid);
+            let euclid_simd = unsafe { euclid_similarity_sse(&v1, &v2) };
+            let euclid = euclid_similarity_half(&v1, &v2);
+            assert_eq!(euclid_simd, euclid);
 
-            // let manhattan_simd = unsafe { manhattan_similarity_sse(&v1, &v2) };
-            // let manhattan = manhattan_similarity_half(&v1, &v2);
-            // assert_eq!(manhattan_simd, manhattan);
+            let manhattan_simd = unsafe { manhattan_similarity_sse(&v1, &v2) };
+            let manhattan = manhattan_similarity_half(&v1, &v2);
+            assert_eq!(manhattan_simd, manhattan);
 
-            // let dot_simd = unsafe { dot_similarity_sse(&v1, &v2) };
-            // let dot = dot_similarity_half(&v1, &v2);
-            // assert_eq!(dot_simd, dot);
+            let dot_simd = unsafe { dot_similarity_sse(&v1, &v2) };
+            let dot = dot_similarity_half(&v1, &v2);
+            assert_eq!(dot_simd, dot);
 
             // let cosine_simd = unsafe { cosine_preprocess_sse(v1.clone()) };
             // let cosine = cosine_preprocess(v1);
