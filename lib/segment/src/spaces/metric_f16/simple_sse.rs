@@ -3,14 +3,12 @@ use std::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
 
+use common::types::ScoreType;
 use half::f16;
-
 use num_traits::Float;
 
-use common::types::ScoreType;
-
-use crate::spaces::tools::is_length_zero_or_normalized;
 use crate::data_types::vectors::{DenseVector, VectorElementTypeHalf};
+use crate::spaces::tools::is_length_zero_or_normalized;
 
 #[target_feature(enable = "sse")]
 #[allow(clippy::missing_safety_doc)]
@@ -76,7 +74,7 @@ pub(crate) unsafe fn euclid_similarity_sse(
         + hsum128_ps_sse(sum128_3)
         + hsum128_ps_sse(sum128_4);
     for i in 0..n - m {
-        result += (f16::to_f32(*ptr1_f16.add(i)) -  f16::to_f32(*ptr2_f16.add(i))).powi(2);
+        result += (f16::to_f32(*ptr1_f16.add(i)) - f16::to_f32(*ptr2_f16.add(i))).powi(2);
     }
     -result
 }
@@ -209,7 +207,10 @@ pub(crate) unsafe fn dot_similarity_sse(
     while i < m {
         addr1s = _mm_loadu_si128(ptr1);
         addr2s = _mm_loadu_si128(ptr2);
-        sum128_1 = _mm_add_ps(_mm_mul_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s)), sum128_1);
+        sum128_1 = _mm_add_ps(
+            _mm_mul_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s)),
+            sum128_1,
+        );
 
         addr1s = _mm_loadu_si128(ptr1.add(4));
         addr2s = _mm_loadu_si128(ptr2.add(4));
@@ -262,12 +263,52 @@ mod tests {
 
         if is_x86_feature_detected!("sse") {
             let v1: Vec<f16> = vec![
-                f16::from_f32(10.), f16::from_f32(11.), f16::from_f32(12.), f16::from_f32(13.), f16::from_f32(14.), f16::from_f32(15.), f16::from_f32(16.), f16::from_f32(17.), f16::from_f32(18.), f16::from_f32(19.), f16::from_f32(20.), f16::from_f32(21.), f16::from_f32(22.), f16::from_f32(23.), f16::from_f32(24.), f16::from_f32(25.),
-                f16::from_f32(26.), f16::from_f32(27.), f16::from_f32(28.), f16::from_f32(29.), f16::from_f32(30.), f16::from_f32(31.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
+                f16::from_f32(23.),
+                f16::from_f32(24.),
+                f16::from_f32(25.),
+                f16::from_f32(26.),
+                f16::from_f32(27.),
+                f16::from_f32(28.),
+                f16::from_f32(29.),
+                f16::from_f32(30.),
+                f16::from_f32(31.),
             ];
             let v2: Vec<f16> = vec![
-                f16::from_f32(40.), f16::from_f32(41.), f16::from_f32(42.), f16::from_f32(43.), f16::from_f32(44.), f16::from_f32(45.), f16::from_f32(46.), f16::from_f32(47.), f16::from_f32(48.), f16::from_f32(49.), f16::from_f32(50.), f16::from_f32(51.), f16::from_f32(52.), f16::from_f32(53.), f16::from_f32(54.), f16::from_f32(55.),
-                f16::from_f32(56.), f16::from_f32(57.), f16::from_f32(58.), f16::from_f32(59.), f16::from_f32(60.), f16::from_f32(61.),
+                f16::from_f32(40.),
+                f16::from_f32(41.),
+                f16::from_f32(42.),
+                f16::from_f32(43.),
+                f16::from_f32(44.),
+                f16::from_f32(45.),
+                f16::from_f32(46.),
+                f16::from_f32(47.),
+                f16::from_f32(48.),
+                f16::from_f32(49.),
+                f16::from_f32(50.),
+                f16::from_f32(51.),
+                f16::from_f32(52.),
+                f16::from_f32(53.),
+                f16::from_f32(54.),
+                f16::from_f32(55.),
+                f16::from_f32(56.),
+                f16::from_f32(57.),
+                f16::from_f32(58.),
+                f16::from_f32(59.),
+                f16::from_f32(60.),
+                f16::from_f32(61.),
             ];
 
             let euclid_simd = unsafe { euclid_similarity_sse(&v1, &v2) };

@@ -1,17 +1,16 @@
 use common::types::ScoreType;
-
 use half::f16;
 use num_traits::Float;
 
-use crate::spaces::metric::{Metric, MetricPostProcessing};
 #[cfg(target_arch = "x86_64")]
 use super::simple_avx::*;
 #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
 use super::simple_neon::*;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use super::simple_sse::*;
-use crate::spaces::tools::is_length_zero_or_normalized;
 use crate::data_types::vectors::{DenseVector, VectorElementTypeHalf};
+use crate::spaces::metric::{Metric, MetricPostProcessing};
+use crate::spaces::tools::is_length_zero_or_normalized;
 use crate::types::Distance;
 
 #[cfg(target_arch = "x86_64")]
@@ -196,18 +195,18 @@ impl Metric<VectorElementTypeHalf> for CosineMetric {
     }
 }
 
-pub fn euclid_similarity_half(v1: &[VectorElementTypeHalf], v2: &[VectorElementTypeHalf]) -> ScoreType {
-    f16::to_f32(-v1.iter()
-        .zip(v2)
-        .map(|(a, b)| (a - b).powi(2))
-        .sum::<f16>())
+pub fn euclid_similarity_half(
+    v1: &[VectorElementTypeHalf],
+    v2: &[VectorElementTypeHalf],
+) -> ScoreType {
+    f16::to_f32(-v1.iter().zip(v2).map(|(a, b)| (a - b).powi(2)).sum::<f16>())
 }
 
-pub fn manhattan_similarity_half(v1: &[VectorElementTypeHalf], v2: &[VectorElementTypeHalf]) -> ScoreType {
-    f16::to_f32(-v1.iter()
-        .zip(v2)
-        .map(|(a, b)| (a - b).abs())
-        .sum::<f16>())
+pub fn manhattan_similarity_half(
+    v1: &[VectorElementTypeHalf],
+    v2: &[VectorElementTypeHalf],
+) -> ScoreType {
+    f16::to_f32(-v1.iter().zip(v2).map(|(a, b)| (a - b).abs()).sum::<f16>())
 }
 
 pub fn cosine_preprocess(vector: DenseVector) -> DenseVector {
@@ -219,7 +218,10 @@ pub fn cosine_preprocess(vector: DenseVector) -> DenseVector {
     vector.iter().map(|x| x / length).collect()
 }
 
-pub fn dot_similarity_half(v1: &[VectorElementTypeHalf], v2: &[VectorElementTypeHalf]) -> ScoreType {
+pub fn dot_similarity_half(
+    v1: &[VectorElementTypeHalf],
+    v2: &[VectorElementTypeHalf],
+) -> ScoreType {
     f16::to_f32(v1.iter().zip(v2).map(|(a, b)| a * b).sum())
 }
 

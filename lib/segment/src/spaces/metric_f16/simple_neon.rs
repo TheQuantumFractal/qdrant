@@ -1,17 +1,14 @@
+use core::arch::global_asm;
 #[cfg(target_feature = "neon")]
 use std::arch::aarch64::*;
 
 #[cfg(target_feature = "neon")]
 use common::types::ScoreType;
-
-use core::arch::global_asm;
-
 use half::f16;
-
 use num_traits::Float;
 
-use crate::spaces::tools::is_length_zero_or_normalized;
 use crate::data_types::vectors::{DenseVector, VectorElementTypeHalf};
+use crate::spaces::tools::is_length_zero_or_normalized;
 #[cfg(target_feature = "neon")]
 
 global_asm!(include_str!("arm.s"));
@@ -68,12 +65,52 @@ mod tests {
 
         if std::arch::is_aarch64_feature_detected!("neon") {
             let v1: Vec<f16> = vec![
-                f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.), f16::from_f32(5.), f16::from_f32(6.), f16::from_f32(7.), f16::from_f32(8.), f16::from_f32(9.), f16::from_f32(10.), f16::from_f32(11.), f16::from_f32(12.), f16::from_f32(13.), f16::from_f32(14.), f16::from_f32(15.), f16::from_f32(16.),
-                f16::from_f32(17.), f16::from_f32(18.), f16::from_f32(19.), f16::from_f32(20.), f16::from_f32(21.), f16::from_f32(22.),
+                f16::from_f32(1.),
+                f16::from_f32(2.),
+                f16::from_f32(3.),
+                f16::from_f32(4.),
+                f16::from_f32(5.),
+                f16::from_f32(6.),
+                f16::from_f32(7.),
+                f16::from_f32(8.),
+                f16::from_f32(9.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
             ];
             let v2: Vec<f16> = vec![
-                f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.), f16::from_f32(5.), f16::from_f32(6.), f16::from_f32(7.), f16::from_f32(8.), f16::from_f32(9.), f16::from_f32(10.), f16::from_f32(11.), f16::from_f32(12.), f16::from_f32(13.), f16::from_f32(14.), f16::from_f32(15.), f16::from_f32(16.),
-                f16::from_f32(17.), f16::from_f32(18.), f16::from_f32(19.), f16::from_f32(20.), f16::from_f32(21.), f16::from_f32(22.), f16::from_f32(23.),
+                f16::from_f32(2.),
+                f16::from_f32(3.),
+                f16::from_f32(4.),
+                f16::from_f32(5.),
+                f16::from_f32(6.),
+                f16::from_f32(7.),
+                f16::from_f32(8.),
+                f16::from_f32(9.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
+                f16::from_f32(23.),
             ];
 
             let euclid_simd = unsafe { euclid_similarity_neon(&v1, &v2) };
@@ -86,7 +123,7 @@ mod tests {
 
             let dot_simd = unsafe { dot_similarity_neon(&v1, &v2) };
             let dot = dot_similarity_half(&v1, &v2);
-            assert!((dot_simd-dot).abs() < dot_simd*0.01);
+            assert!((dot_simd - dot).abs() < dot_simd * 0.01);
             assert_eq!(dot_simd, dot);
 
             // let cosine_simd = unsafe { cosine_preprocess_neon(v1.clone()) };

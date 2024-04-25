@@ -1,10 +1,10 @@
 use std::borrow::Cow;
 
+use half::f16;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use half::f16;
-use crate::data_types::vectors::{VectorElementType, VectorElementTypeHalf, VectorElementTypeByte};
+use crate::data_types::vectors::{VectorElementType, VectorElementTypeByte, VectorElementTypeHalf};
 use crate::spaces::metric::Metric;
 use crate::spaces::simple::{CosineMetric, DotProductMetric, EuclidMetric, ManhattanMetric};
 use crate::types::{Distance, QuantizationConfig, VectorStorageDatatype};
@@ -65,12 +65,8 @@ impl PrimitiveVectorElement for VectorElementTypeHalf {
         let preprocessed_vector = match distance {
             Distance::Cosine => <CosineMetric as Metric<VectorElementType>>::preprocess(v),
             Distance::Euclid => <EuclidMetric as Metric<VectorElementType>>::preprocess(v),
-            Distance::Dot => {
-                <DotProductMetric as Metric<VectorElementType>>::preprocess(v)
-            }
-            Distance::Manhattan => {
-                <ManhattanMetric as Metric<VectorElementType>>::preprocess(v)
-            }
+            Distance::Dot => <DotProductMetric as Metric<VectorElementType>>::preprocess(v),
+            Distance::Manhattan => <ManhattanMetric as Metric<VectorElementType>>::preprocess(v),
         };
         Cow::from(preprocessed_vector)
     }

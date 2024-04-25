@@ -1,13 +1,11 @@
 use std::arch::x86_64::*;
 
 use common::types::ScoreType;
-
 use half::f16;
-
 use num_traits::Float;
 
-use crate::spaces::tools::is_length_zero_or_normalized;
 use crate::data_types::vectors::{DenseVector, VectorElementTypeHalf};
+use crate::spaces::tools::is_length_zero_or_normalized;
 
 #[target_feature(enable = "avx")]
 #[target_feature(enable = "fma")]
@@ -42,36 +40,31 @@ pub(crate) unsafe fn euclid_similarity_avx(
     while i < m {
         addr1s = _mm_loadu_si128(ptr1);
         addr2s = _mm_loadu_si128(ptr2);
-        let sub256_1: __m256 =
-            _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
+        let sub256_1: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_1 = _mm256_fmadd_ps(sub256_1, sub256_1, sum256_1);
 
         addr1s = _mm_loadu_si128(ptr1.add(8));
         addr2s = _mm_loadu_si128(ptr2.add(8));
 
-        let sub256_2: __m256 =
-            _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
+        let sub256_2: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_2 = _mm256_fmadd_ps(sub256_2, sub256_2, sum256_2);
 
         addr1s = _mm_loadu_si128(ptr1.add(16));
         addr2s = _mm_loadu_si128(ptr2.add(16));
 
-        let sub256_3: __m256 =
-            _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
+        let sub256_3: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_3 = _mm256_fmadd_ps(sub256_3, sub256_3, sum256_3);
 
         addr1s = _mm_loadu_si128(ptr1.add(24));
         addr2s = _mm_loadu_si128(ptr2.add(24));
 
-        let sub256_4: __m256 =
-            _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
+        let sub256_4: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_4 = _mm256_fmadd_ps(sub256_4, sub256_4, sum256_4);
 
         ptr1 = ptr1.add(32);
         ptr2 = ptr2.add(32);
         i += 32;
     }
-
 
     let mut ptr1_f16: *const f16 = ptr1 as *const f16;
     let mut ptr2_f16: *const f16 = ptr2 as *const f16;
@@ -109,7 +102,6 @@ pub(crate) unsafe fn manhattan_similarity_avx(
 
     let mut i: usize = 0;
     while i < m {
-
         addr1s = _mm_loadu_si128(ptr1);
         addr2s = _mm_loadu_si128(ptr2);
         let sub256_1: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
@@ -213,7 +205,6 @@ pub(crate) unsafe fn dot_similarity_avx(
     let mut addr2s: __m128i;
     let mut i: usize = 0;
     while i < m {
-
         addr1s = _mm_loadu_si128(ptr1);
         addr2s = _mm_loadu_si128(ptr2);
 
@@ -262,12 +253,52 @@ mod tests {
 
         if is_x86_feature_detected!("avx") && is_x86_feature_detected!("fma") {
             let v1: Vec<f16> = vec![
-                f16::from_f32(10.), f16::from_f32(11.), f16::from_f32(12.), f16::from_f32(13.), f16::from_f32(14.), f16::from_f32(15.), f16::from_f32(16.), f16::from_f32(17.), f16::from_f32(18.), f16::from_f32(19.), f16::from_f32(20.), f16::from_f32(21.), f16::from_f32(22.), f16::from_f32(23.), f16::from_f32(24.), f16::from_f32(25.),
-                f16::from_f32(26.), f16::from_f32(27.), f16::from_f32(28.), f16::from_f32(29.), f16::from_f32(30.), f16::from_f32(31.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
+                f16::from_f32(23.),
+                f16::from_f32(24.),
+                f16::from_f32(25.),
+                f16::from_f32(26.),
+                f16::from_f32(27.),
+                f16::from_f32(28.),
+                f16::from_f32(29.),
+                f16::from_f32(30.),
+                f16::from_f32(31.),
             ];
             let v2: Vec<f16> = vec![
-                f16::from_f32(40.), f16::from_f32(41.), f16::from_f32(42.), f16::from_f32(43.), f16::from_f32(44.), f16::from_f32(45.), f16::from_f32(46.), f16::from_f32(47.), f16::from_f32(48.), f16::from_f32(49.), f16::from_f32(50.), f16::from_f32(51.), f16::from_f32(52.), f16::from_f32(53.), f16::from_f32(54.), f16::from_f32(55.),
-                f16::from_f32(56.), f16::from_f32(57.), f16::from_f32(58.), f16::from_f32(59.), f16::from_f32(60.), f16::from_f32(61.),
+                f16::from_f32(40.),
+                f16::from_f32(41.),
+                f16::from_f32(42.),
+                f16::from_f32(43.),
+                f16::from_f32(44.),
+                f16::from_f32(45.),
+                f16::from_f32(46.),
+                f16::from_f32(47.),
+                f16::from_f32(48.),
+                f16::from_f32(49.),
+                f16::from_f32(50.),
+                f16::from_f32(51.),
+                f16::from_f32(52.),
+                f16::from_f32(53.),
+                f16::from_f32(54.),
+                f16::from_f32(55.),
+                f16::from_f32(56.),
+                f16::from_f32(57.),
+                f16::from_f32(58.),
+                f16::from_f32(59.),
+                f16::from_f32(60.),
+                f16::from_f32(61.),
             ];
 
             let euclid_simd = unsafe { euclid_similarity_avx(&v1, &v2) };
