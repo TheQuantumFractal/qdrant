@@ -9,6 +9,7 @@ pub mod simple_sse;
 pub mod simple_avx;
 
 pub mod metric_uint;
+pub mod metric_f16;
 
 #[cfg(target_arch = "aarch64")]
 pub mod simple_neon;

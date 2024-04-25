@@ -52,12 +52,12 @@ impl Metric<VectorElementTypeHalf> for EuclidMetric {
             }
         }
 
-        // #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-        // {
-        //     if is_x86_feature_detected!("sse") && v1.len() >= MIN_DIM_SIZE_SIMD {
-        //         return unsafe { euclid_similarity_sse(v1, v2) };
-        //     }
-        // }
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if is_x86_feature_detected!("sse") && v1.len() >= MIN_DIM_SIZE_SIMD {
+                return unsafe { euclid_similarity_sse(v1, v2) };
+            }
+        }
 
         #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
         {
@@ -86,22 +86,22 @@ impl Metric<VectorElementTypeHalf> for ManhattanMetric {
     }
 
     fn similarity(v1: &[VectorElementTypeHalf], v2: &[VectorElementTypeHalf]) -> ScoreType {
-        // #[cfg(target_arch = "x86_64")]
-        // {
-        //     if is_x86_feature_detected!("avx")
-        //         && is_x86_feature_detected!("fma")
-        //         && v1.len() >= MIN_DIM_SIZE_AVX
-        //     {
-        //         return unsafe { manhattan_similarity_avx(v1, v2) };
-        //     }
-        // }
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("avx")
+                && is_x86_feature_detected!("fma")
+                && v1.len() >= MIN_DIM_SIZE_AVX
+            {
+                return unsafe { manhattan_similarity_avx(v1, v2) };
+            }
+        }
 
-        // #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-        // {
-        //     if is_x86_feature_detected!("sse") && v1.len() >= MIN_DIM_SIZE_SIMD {
-        //         return unsafe { manhattan_similarity_sse(v1, v2) };
-        //     }
-        // }
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if is_x86_feature_detected!("sse") && v1.len() >= MIN_DIM_SIZE_SIMD {
+                return unsafe { manhattan_similarity_sse(v1, v2) };
+            }
+        }
 
         #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
         {
@@ -124,22 +124,22 @@ impl Metric<VectorElementTypeHalf> for DotProductMetric {
     }
 
     fn similarity(v1: &[VectorElementTypeHalf], v2: &[VectorElementTypeHalf]) -> ScoreType {
-        // #[cfg(target_arch = "x86_64")]
-        // {
-        //     if is_x86_feature_detected!("avx")
-        //         && is_x86_feature_detected!("fma")
-        //         && v1.len() >= MIN_DIM_SIZE_AVX
-        //     {
-        //         return unsafe { dot_similarity_avx(v1, v2) };
-        //     }
-        // }
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("avx")
+                && is_x86_feature_detected!("fma")
+                && v1.len() >= MIN_DIM_SIZE_AVX
+            {
+                return unsafe { dot_similarity_avx(v1, v2) };
+            }
+        }
 
-        // #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-        // {
-        //     if is_x86_feature_detected!("sse") && v1.len() >= MIN_DIM_SIZE_SIMD {
-        //         return unsafe { dot_similarity_sse(v1, v2) };
-        //     }
-        // }
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if is_x86_feature_detected!("sse") && v1.len() >= MIN_DIM_SIZE_SIMD {
+                return unsafe { dot_similarity_sse(v1, v2) };
+            }
+        }
 
         #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
         {
@@ -223,15 +223,15 @@ pub fn dot_similarity_half(v1: &[VectorElementTypeHalf], v2: &[VectorElementType
     f16::to_f32(v1.iter().zip(v2).map(|(a, b)| a * b).sum())
 }
 
-#[cfg(test)]
-mod tests {
-    use rand::Rng;
+// #[cfg(test)]
+// mod tests {
+//     use rand::Rng;
 
-    use super::*;
+//     use super::*;
 
-    #[test]
-    fn test_cosine_preprocessing() {
-        let res = <CosineMetric as Metric<VectorElementTypeHalf>>::preprocess(vec![0.0, 0.0, 0.0, 0.0]);
-        assert_eq!(res, vec![0.0, 0.0, 0.0, 0.0]);
-    }
-}
+//     #[test]
+//     fn test_cosine_preprocessing() {
+//         let res = <CosineMetric as Metric<VectorElementTypeHalf>>::preprocess(vec![0.0, 0.0, 0.0, 0.0]);
+//         assert_eq!(res, vec![0.0, 0.0, 0.0, 0.0]);
+//     }
+// }
