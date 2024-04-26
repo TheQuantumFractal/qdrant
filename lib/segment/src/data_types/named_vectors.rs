@@ -286,6 +286,7 @@ impl<'a> NamedVectors<'a> {
                     <ManhattanMetric as Metric<VectorElementTypeByte>>::preprocess(dense_vector)
                 }
             },
+            Some(VectorStorageDatatype::Float16) => todo!(),
         }
     }
 }
