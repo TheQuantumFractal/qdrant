@@ -167,7 +167,6 @@ mod tests {
 
             let dot_simd = unsafe { dot_similarity_neon(&v1, &v2) };
             let dot = dot_similarity_half(&v1, &v2);
-            assert!((dot_simd - dot).abs() < dot_simd * 0.01);
             assert_eq!(dot_simd, dot);
 
             // let cosine_simd = unsafe { cosine_preprocess_neon(v1.clone()) };
