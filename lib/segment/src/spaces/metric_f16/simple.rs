@@ -166,31 +166,6 @@ impl Metric<VectorElementTypeHalf> for CosineMetric {
     }
 
     fn preprocess(vector: DenseVector) -> DenseVector {
-        // #[cfg(target_arch = "x86_64")]
-        // {
-        //     if is_x86_feature_detected!("avx")
-        //         && is_x86_feature_detected!("fma")
-        //         && vector.len() >= MIN_DIM_SIZE_AVX
-        //     {
-        //         return unsafe { cosine_preprocess_avx(vector) };
-        //     }
-        // }
-
-        // #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-        // {
-        //     if is_x86_feature_detected!("sse") && vector.len() >= MIN_DIM_SIZE_SIMD {
-        //         return unsafe { cosine_preprocess_sse(vector) };
-        //     }
-        // }
-
-        // #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
-        // {
-        //     if std::arch::is_aarch64_feature_detected!("neon") && vector.len() >= MIN_DIM_SIZE_SIMD
-        //     {
-        //         return unsafe { cosine_preprocess_neon(vector) };
-        //     }
-        // }
-
         cosine_preprocess(vector)
     }
 }
@@ -224,16 +199,3 @@ pub fn dot_similarity_half(
 ) -> ScoreType {
     f16::to_f32(v1.iter().zip(v2).map(|(a, b)| a * b).sum())
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use rand::Rng;
-
-//     use super::*;
-
-//     #[test]
-//     fn test_cosine_preprocessing() {
-//         let res = <CosineMetric as Metric<VectorElementTypeHalf>>::preprocess(vec![0.0, 0.0, 0.0, 0.0]);
-//         assert_eq!(res, vec![0.0, 0.0, 0.0, 0.0]);
-//     }
-// }

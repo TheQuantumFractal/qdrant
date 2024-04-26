@@ -1,15 +1,11 @@
 use core::arch::global_asm;
-#[cfg(target_feature = "neon")]
-use std::arch::aarch64::*;
 
 #[cfg(target_feature = "neon")]
 use common::types::ScoreType;
 use half::f16;
-use num_traits::Float;
 
-use crate::data_types::vectors::{DenseVector, VectorElementTypeHalf};
-use crate::spaces::tools::is_length_zero_or_normalized;
 #[cfg(target_feature = "neon")]
+use crate::data_types::vectors::VectorElementTypeHalf;
 
 global_asm!(include_str!("arm.s"));
 
@@ -36,15 +32,6 @@ pub(crate) unsafe fn manhattan_similarity_neon(
     let n = v1.len();
     -manhattanDist_half_4x4(v1.as_ptr(), v2.as_ptr(), n.try_into().unwrap())
 }
-
-// #[cfg(target_feature = "neon")]
-// pub(crate) unsafe fn cosine_preprocess_neon(vector: &[VectorElementTypeHalf]) -> &[VectorElementTypeHalf] {
-//     let n = vector.len();
-
-//     let length = manhattanDist_half_4x4(vector.as_ptr(), vector.as_ptr(), n.try_into().unwrap());
-//     let length = length.sqrt();
-//     vector.into_iter().map(|x| x / length).collect()
-// }
 
 #[cfg(target_feature = "neon")]
 pub(crate) unsafe fn dot_similarity_neon(
@@ -169,9 +156,6 @@ mod tests {
             let dot = dot_similarity_half(&v1, &v2);
             assert_eq!(dot_simd, dot);
 
-            // let cosine_simd = unsafe { cosine_preprocess_neon(v1.clone()) };
-            // let cosine = cosine_preprocess(v1);
-            // assert_eq!(cosine_simd, cosine);
         } else {
             println!("neon test skipped");
         }
