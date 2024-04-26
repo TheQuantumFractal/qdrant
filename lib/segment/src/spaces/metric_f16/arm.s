@@ -246,6 +246,8 @@ LarmBB0_4:
 	str	s0, [sp, #1212]
 	ldr	s0, [sp, #1212]
 	str	s0, [sp, #616]
+	mov	w8, #0
+	str	w8, [sp, #284]
 	b	LarmBB0_5
 LarmBB0_5:                                 ; =>This Inner Loop Header: Depth=1
 	ldr	w8, [sp, #284]
@@ -612,6 +614,7 @@ LarmBB1_4:
 	str	s0, [sp, #952]
 	mov	w8, #0
 	str	w8, [sp, #12]
+	str	w8, [sp, #300]
 	b	LarmBB1_5
 LarmBB1_5:                                 ; =>This Inner Loop Header: Depth=1
 	ldr	w8, [sp, #300]
@@ -925,6 +928,7 @@ LarmBB2_4:
 	str	s0, [sp, #648]
 	mov	w8, #0
 	str	w8, [sp, #28]
+	str	w8, [sp, #316]
 	b	LarmBB2_5
 LarmBB2_5:                                 ; =>This Inner Loop Header: Depth=1
 	ldr	w8, [sp, #316]

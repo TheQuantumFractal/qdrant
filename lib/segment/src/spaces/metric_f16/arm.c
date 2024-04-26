@@ -33,7 +33,7 @@ float32_t dotProduct_half_4x4(const float16_t* pSrcA, const float16_t* pSrcB, ui
     sum = vaddq_f32(sum, vcvt_f32_f16(vget_low_f16(sum1)));
 
     dotProduct = vaddvq_f32(sum);
-    for (; i < (blockSize % 32); i++) {
+    for (i=0; i < (blockSize % 32); i++) {
         dotProduct += (*pSrcA)*(*pSrcB);
         pSrcA += 1;
         pSrcB += 1;
@@ -82,7 +82,7 @@ float32_t euclideanDist_half_4x4(const float16_t* pSrcA, const float16_t* pSrcB,
 
     euclideanDistance = vaddvq_f32(sum);
     float32_t tmp = 0.0f;
-    for (; i < (blockSize % 32); i++) {
+    for (i=0; i < (blockSize % 32); i++) {
         tmp = (*pSrcA - *pSrcB);
         euclideanDistance += tmp * tmp;
         pSrcA += 1;
@@ -124,7 +124,7 @@ float32_t manhattanDist_half_4x4(const float16_t* pSrcA, const float16_t* pSrcB,
 
     manhattanDistance = vaddvq_f32(sum);
     float32_t tmp = 0.0f;
-    for (; i < (blockSize % 32); i++) {
+    for (i=0; i < (blockSize % 32); i++) {
         tmp = (*pSrcA - *pSrcB);
         manhattanDistance += tmp > 0 ? tmp : -tmp;
         pSrcA += 1;

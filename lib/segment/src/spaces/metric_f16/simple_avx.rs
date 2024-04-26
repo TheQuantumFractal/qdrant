@@ -43,31 +43,31 @@ pub(crate) unsafe fn euclid_similarity_avx(
         let sub256_1: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_1 = _mm256_fmadd_ps(sub256_1, sub256_1, sum256_1);
 
-        addr1s = _mm_loadu_si128(ptr1.add(8));
-        addr2s = _mm_loadu_si128(ptr2.add(8));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(1));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(1));
 
         let sub256_2: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_2 = _mm256_fmadd_ps(sub256_2, sub256_2, sum256_2);
 
-        addr1s = _mm_loadu_si128(ptr1.add(16));
-        addr2s = _mm_loadu_si128(ptr2.add(16));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(2));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(2));
 
         let sub256_3: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_3 = _mm256_fmadd_ps(sub256_3, sub256_3, sum256_3);
 
-        addr1s = _mm_loadu_si128(ptr1.add(24));
-        addr2s = _mm_loadu_si128(ptr2.add(24));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(3));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(3));
 
         let sub256_4: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_4 = _mm256_fmadd_ps(sub256_4, sub256_4, sum256_4);
 
-        ptr1 = ptr1.add(32);
-        ptr2 = ptr2.add(32);
+        ptr1 = ptr1.wrapping_add(4);
+        ptr2 = ptr2.wrapping_add(4);
         i += 32;
     }
 
-    let mut ptr1_f16: *const f16 = ptr1 as *const f16;
-    let mut ptr2_f16: *const f16 = ptr2 as *const f16;
+    let ptr1_f16: *const f16 = ptr1 as *const f16;
+    let ptr2_f16: *const f16 = ptr2 as *const f16;
 
     let mut result = hsum256_ps_avx(sum256_1)
         + hsum256_ps_avx(sum256_2)
@@ -107,31 +107,31 @@ pub(crate) unsafe fn manhattan_similarity_avx(
         let sub256_1: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_1 = _mm256_add_ps(_mm256_andnot_ps(mask, sub256_1), sum256_1);
 
-        addr1s = _mm_loadu_si128(ptr1.add(8));
-        addr2s = _mm_loadu_si128(ptr2.add(8));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(1));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(1));
 
         let sub256_2: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_2 = _mm256_add_ps(_mm256_andnot_ps(mask, sub256_2), sum256_2);
 
-        addr1s = _mm_loadu_si128(ptr1.add(16));
-        addr2s = _mm_loadu_si128(ptr2.add(16));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(2));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(2));
 
         let sub256_3: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_3 = _mm256_add_ps(_mm256_andnot_ps(mask, sub256_3), sum256_3);
 
-        addr1s = _mm_loadu_si128(ptr1.add(24));
-        addr2s = _mm_loadu_si128(ptr2.add(24));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(3));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(3));
 
         let sub256_4: __m256 = _mm256_sub_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s));
         sum256_4 = _mm256_add_ps(_mm256_andnot_ps(mask, sub256_4), sum256_4);
 
-        ptr1 = ptr1.add(32);
-        ptr2 = ptr2.add(32);
+        ptr1 = ptr1.wrapping_add(4);
+        ptr2 = ptr2.wrapping_add(4);
         i += 32;
     }
 
-    let mut ptr1_f16: *const f16 = ptr1 as *const f16;
-    let mut ptr2_f16: *const f16 = ptr2 as *const f16;
+    let ptr1_f16: *const f16 = ptr1 as *const f16;
+    let ptr2_f16: *const f16 = ptr2 as *const f16;
 
     let mut result = hsum256_ps_avx(sum256_1)
         + hsum256_ps_avx(sum256_2)
@@ -210,28 +210,28 @@ pub(crate) unsafe fn dot_similarity_avx(
 
         sum256_1 = _mm256_fmadd_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s), sum256_1);
 
-        addr1s = _mm_loadu_si128(ptr1.add(8));
-        addr2s = _mm_loadu_si128(ptr2.add(8));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(1));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(1));
 
         sum256_2 = _mm256_fmadd_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s), sum256_2);
 
-        addr1s = _mm_loadu_si128(ptr1.add(16));
-        addr2s = _mm_loadu_si128(ptr2.add(16));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(2));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(2));
 
         sum256_3 = _mm256_fmadd_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s), sum256_3);
 
-        addr1s = _mm_loadu_si128(ptr1.add(24));
-        addr2s = _mm_loadu_si128(ptr2.add(24));
+        addr1s = _mm_loadu_si128(ptr1.wrapping_add(3));
+        addr2s = _mm_loadu_si128(ptr2.wrapping_add(3));
 
         sum256_4 = _mm256_fmadd_ps(_mm256_cvtph_ps(addr1s), _mm256_cvtph_ps(addr2s), sum256_4);
 
-        ptr1 = ptr1.add(32);
-        ptr2 = ptr2.add(32);
+        ptr1 = ptr1.wrapping_add(4);
+        ptr2 = ptr2.wrapping_add(4);
         i += 32;
     }
 
-    let mut ptr1_f16: *const f16 = ptr1 as *const f16;
-    let mut ptr2_f16: *const f16 = ptr2 as *const f16;
+    let ptr1_f16: *const f16 = ptr1 as *const f16;
+    let ptr2_f16: *const f16 = ptr2 as *const f16;
 
     let mut result = hsum256_ps_avx(sum256_1)
         + hsum256_ps_avx(sum256_2)
@@ -275,8 +275,52 @@ mod tests {
                 f16::from_f32(20.),
                 f16::from_f32(21.),
                 f16::from_f32(22.),
+                f16::from_f32(1.),
+                f16::from_f32(2.),
+                f16::from_f32(3.),
+                f16::from_f32(4.),
+                f16::from_f32(5.),
+                f16::from_f32(6.),
+                f16::from_f32(7.),
+                f16::from_f32(8.),
+                f16::from_f32(9.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
             ];
             let v2: Vec<f16> = vec![
+                f16::from_f32(2.),
+                f16::from_f32(3.),
+                f16::from_f32(4.),
+                f16::from_f32(5.),
+                f16::from_f32(6.),
+                f16::from_f32(7.),
+                f16::from_f32(8.),
+                f16::from_f32(9.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
+                f16::from_f32(23.),
                 f16::from_f32(2.),
                 f16::from_f32(3.),
                 f16::from_f32(4.),

@@ -25,13 +25,10 @@ pub(crate) unsafe fn euclid_similarity_sse(
     v2: &[VectorElementTypeHalf],
 ) -> ScoreType {
     let n = v1.len();
-    let m = n - (n % 16);
+    let m = n - (n % 8);
     let mut ptr1: *const __m128i = v1.as_ptr() as *const __m128i;
     let mut ptr2: *const __m128i = v2.as_ptr() as *const __m128i;
     let mut sum128_1: __m128 = _mm_setzero_ps();
-    let mut sum128_2: __m128 = _mm_setzero_ps();
-    let mut sum128_3: __m128 = _mm_setzero_ps();
-    let mut sum128_4: __m128 = _mm_setzero_ps();
 
     let mut addr1s: __m128i;
     let mut addr2s: __m128i;
@@ -40,41 +37,27 @@ pub(crate) unsafe fn euclid_similarity_sse(
     while i < m {
         addr1s = _mm_loadu_si128(ptr1);
         addr2s = _mm_loadu_si128(ptr2);
-        let sub128_1 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
+        let mut sub128_1 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
         sum128_1 = _mm_add_ps(_mm_mul_ps(sub128_1, sub128_1), sum128_1);
 
-        addr1s = _mm_loadu_si128(ptr1.add(4));
-        addr2s = _mm_loadu_si128(ptr2.add(4));
+        sub128_1 = _mm_sub_ps(
+            _mm_cvtph_ps(_mm_srli_si128(addr1s, 8)),
+            _mm_cvtph_ps(_mm_srli_si128(addr2s, 8)),
+        );
+        sum128_1 = _mm_add_ps(_mm_mul_ps(sub128_1, sub128_1), sum128_1);
 
-        let sub128_2 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
-        sum128_2 = _mm_add_ps(_mm_mul_ps(sub128_2, sub128_2), sum128_2);
-
-        addr1s = _mm_loadu_si128(ptr1.add(8));
-        addr2s = _mm_loadu_si128(ptr2.add(8));
-
-        let sub128_3 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
-        sum128_3 = _mm_add_ps(_mm_mul_ps(sub128_3, sub128_3), sum128_3);
-
-        addr1s = _mm_loadu_si128(ptr1.add(12));
-        addr2s = _mm_loadu_si128(ptr2.add(12));
-
-        let sub128_4 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
-        sum128_4 = _mm_add_ps(_mm_mul_ps(sub128_4, sub128_4), sum128_4);
-
-        ptr1 = ptr1.add(16);
-        ptr2 = ptr2.add(16);
-        i += 16;
+        ptr1 = ptr1.wrapping_add(1);
+        ptr2 = ptr2.wrapping_add(1);
+        i += 8;
     }
 
-    let mut ptr1_f16: *const f16 = ptr1 as *const f16;
-    let mut ptr2_f16: *const f16 = ptr2 as *const f16;
+    let ptr1_f16: *const f16 = ptr1 as *const f16;
+    let ptr2_f16: *const f16 = ptr2 as *const f16;
 
-    let mut result = hsum128_ps_sse(sum128_1)
-        + hsum128_ps_sse(sum128_2)
-        + hsum128_ps_sse(sum128_3)
-        + hsum128_ps_sse(sum128_4);
+    let mut result = hsum128_ps_sse(sum128_1);
     for i in 0..n - m {
-        result += (f16::to_f32(*ptr1_f16.add(i)) - f16::to_f32(*ptr2_f16.add(i))).powi(2);
+        result += (f16::to_f32(*ptr1_f16.wrapping_add(i)) - f16::to_f32(*ptr2_f16.wrapping_add(i)))
+            .powi(2);
     }
     -result
 }
@@ -88,13 +71,10 @@ pub(crate) unsafe fn manhattan_similarity_sse(
     let mask: __m128 = _mm_set1_ps(-0.0f32); // 1 << 31 used to clear sign bit to mimic abs
 
     let n = v1.len();
-    let m = n - (n % 16);
+    let m = n - (n % 8);
     let mut ptr1: *const __m128i = v1.as_ptr() as *const __m128i;
     let mut ptr2: *const __m128i = v2.as_ptr() as *const __m128i;
     let mut sum128_1: __m128 = _mm_setzero_ps();
-    let mut sum128_2: __m128 = _mm_setzero_ps();
-    let mut sum128_3: __m128 = _mm_setzero_ps();
-    let mut sum128_4: __m128 = _mm_setzero_ps();
 
     let mut addr1s: __m128i;
     let mut addr2s: __m128i;
@@ -104,39 +84,24 @@ pub(crate) unsafe fn manhattan_similarity_sse(
         addr1s = _mm_loadu_si128(ptr1);
         addr2s = _mm_loadu_si128(ptr2);
 
-        let sub128_1 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
+        let mut sub128_1 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
         sum128_1 = _mm_add_ps(_mm_andnot_ps(mask, sub128_1), sum128_1);
 
-        addr1s = _mm_loadu_si128(ptr1.add(4));
-        addr2s = _mm_loadu_si128(ptr2.add(4));
+        sub128_1 = _mm_sub_ps(
+            _mm_cvtph_ps(_mm_srli_si128(addr1s, 8)),
+            _mm_cvtph_ps(_mm_srli_si128(addr2s, 8)),
+        );
+        sum128_1 = _mm_add_ps(_mm_andnot_ps(mask, sub128_1), sum128_1);
 
-        let sub128_2 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
-        sum128_2 = _mm_add_ps(_mm_andnot_ps(mask, sub128_2), sum128_2);
-
-        addr1s = _mm_loadu_si128(ptr1.add(8));
-        addr2s = _mm_loadu_si128(ptr2.add(8));
-
-        let sub128_3 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
-        sum128_3 = _mm_add_ps(_mm_andnot_ps(mask, sub128_3), sum128_3);
-
-        addr1s = _mm_loadu_si128(ptr1.add(12));
-        addr2s = _mm_loadu_si128(ptr2.add(12));
-
-        let sub128_4 = _mm_sub_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s));
-        sum128_4 = _mm_add_ps(_mm_andnot_ps(mask, sub128_4), sum128_4);
-
-        ptr1 = ptr1.add(16);
-        ptr2 = ptr2.add(16);
-        i += 16;
+        ptr1 = ptr1.wrapping_add(1);
+        ptr2 = ptr2.wrapping_add(1);
+        i += 8;
     }
 
-    let mut ptr1_f16: *const f16 = ptr1 as *const f16;
-    let mut ptr2_f16: *const f16 = ptr2 as *const f16;
+    let ptr1_f16: *const f16 = ptr1 as *const f16;
+    let ptr2_f16: *const f16 = ptr2 as *const f16;
 
-    let mut result = hsum128_ps_sse(sum128_1)
-        + hsum128_ps_sse(sum128_2)
-        + hsum128_ps_sse(sum128_3)
-        + hsum128_ps_sse(sum128_4);
+    let mut result = hsum128_ps_sse(sum128_1);
     for i in 0..n - m {
         result += (f16::to_f32(*ptr1_f16.add(i)) - f16::to_f32(*ptr2_f16.add(i))).abs();
     }
@@ -196,9 +161,6 @@ pub(crate) unsafe fn dot_similarity_sse(
     let mut ptr1: *const __m128i = v1.as_ptr() as *const __m128i;
     let mut ptr2: *const __m128i = v2.as_ptr() as *const __m128i;
     let mut sum128_1: __m128 = _mm_setzero_ps();
-    let mut sum128_2: __m128 = _mm_setzero_ps();
-    let mut sum128_3: __m128 = _mm_setzero_ps();
-    let mut sum128_4: __m128 = _mm_setzero_ps();
 
     let mut addr1s: __m128i;
     let mut addr2s: __m128i;
@@ -212,42 +174,23 @@ pub(crate) unsafe fn dot_similarity_sse(
             sum128_1,
         );
 
-        addr1s = _mm_loadu_si128(ptr1.add(4));
-        addr2s = _mm_loadu_si128(ptr2.add(4));
-
-        sum128_2 = _mm_add_ps(
-            _mm_mul_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s)),
-            sum128_2,
+        sum128_1 = _mm_add_ps(
+            _mm_mul_ps(
+                _mm_cvtph_ps(_mm_srli_si128(addr1s, 8)),
+                _mm_cvtph_ps(_mm_srli_si128(addr2s, 8)),
+            ),
+            sum128_1,
         );
 
-        addr1s = _mm_loadu_si128(ptr1.add(8));
-        addr2s = _mm_loadu_si128(ptr2.add(8));
-
-        sum128_3 = _mm_add_ps(
-            _mm_mul_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s)),
-            sum128_3,
-        );
-
-        addr1s = _mm_loadu_si128(ptr1.add(12));
-        addr2s = _mm_loadu_si128(ptr2.add(12));
-
-        sum128_4 = _mm_add_ps(
-            _mm_mul_ps(_mm_cvtph_ps(addr1s), _mm_cvtph_ps(addr2s)),
-            sum128_4,
-        );
-
-        ptr1 = ptr1.add(16);
-        ptr2 = ptr2.add(16);
-        i += 16;
+        ptr1 = ptr1.wrapping_add(1);
+        ptr2 = ptr2.wrapping_add(1);
+        i += 8;
     }
 
-    let mut ptr1_f16: *const f16 = ptr1 as *const f16;
-    let mut ptr2_f16: *const f16 = ptr2 as *const f16;
+    let ptr1_f16: *const f16 = ptr1 as *const f16;
+    let ptr2_f16: *const f16 = ptr2 as *const f16;
 
-    let mut result = hsum128_ps_sse(sum128_1)
-        + hsum128_ps_sse(sum128_2)
-        + hsum128_ps_sse(sum128_3)
-        + hsum128_ps_sse(sum128_4);
+    let mut result = hsum128_ps_sse(sum128_1);
     for i in 0..n - m {
         result += f16::to_f32(*ptr1_f16.add(i)) * f16::to_f32(*ptr2_f16.add(i));
     }
@@ -285,8 +228,52 @@ mod tests {
                 f16::from_f32(20.),
                 f16::from_f32(21.),
                 f16::from_f32(22.),
+                f16::from_f32(1.),
+                f16::from_f32(2.),
+                f16::from_f32(3.),
+                f16::from_f32(4.),
+                f16::from_f32(5.),
+                f16::from_f32(6.),
+                f16::from_f32(7.),
+                f16::from_f32(8.),
+                f16::from_f32(9.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
             ];
             let v2: Vec<f16> = vec![
+                f16::from_f32(2.),
+                f16::from_f32(3.),
+                f16::from_f32(4.),
+                f16::from_f32(5.),
+                f16::from_f32(6.),
+                f16::from_f32(7.),
+                f16::from_f32(8.),
+                f16::from_f32(9.),
+                f16::from_f32(10.),
+                f16::from_f32(11.),
+                f16::from_f32(12.),
+                f16::from_f32(13.),
+                f16::from_f32(14.),
+                f16::from_f32(15.),
+                f16::from_f32(16.),
+                f16::from_f32(17.),
+                f16::from_f32(18.),
+                f16::from_f32(19.),
+                f16::from_f32(20.),
+                f16::from_f32(21.),
+                f16::from_f32(22.),
+                f16::from_f32(23.),
                 f16::from_f32(2.),
                 f16::from_f32(3.),
                 f16::from_f32(4.),
