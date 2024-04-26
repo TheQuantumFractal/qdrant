@@ -155,7 +155,6 @@ mod tests {
             let dot_simd = unsafe { dot_similarity_neon(&v1, &v2) };
             let dot = dot_similarity_half(&v1, &v2);
             assert_eq!(dot_simd, dot);
-
         } else {
             println!("neon test skipped");
         }

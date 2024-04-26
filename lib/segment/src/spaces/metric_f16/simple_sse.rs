@@ -266,7 +266,6 @@ mod tests {
             let dot_simd = unsafe { dot_similarity_sse(&v1, &v2) };
             let dot = dot_similarity_half(&v1, &v2);
             assert_eq!(dot_simd, dot);
-            
         } else {
             println!("sse test skipped");
         }
